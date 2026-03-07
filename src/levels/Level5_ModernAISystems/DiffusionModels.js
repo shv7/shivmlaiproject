@@ -1066,7 +1066,7 @@ const DiffusionModelsPage = ({ onBack }) => (
                 <IBox color={ORG} title="Why Gaussian noise?"
                   body="Gaussian noise has special mathematical properties: the sum of Gaussian random variables is Gaussian. This means q(x_t | x_0) = N(√ᾱ_t · x_0, (1-ᾱ_t)I) has a closed form — we can compute x_t from x_0 directly without simulation. Non-Gaussian noise breaks this tractability. The entire efficiency of diffusion models depends on the Gaussian assumption." />
                 <div style={{ background: "#100a00", borderRadius: 12, padding: "14px", fontFamily: "monospace", fontSize: px(11), lineHeight: 2 }}>
-                  <div style={{ color: "#475569" }}># Forward process: q(x_t | x_{t-1})</div>
+                  <div style={{ color: "#475569" }}>{"# Forward process: q(x_t | x_{t-1})"}</div>
                   <div style={{ color: ORG }}>{"q(x_t|x_{t-1}) = N(x_t; √(1-β_t)x_{t-1}, β_t·I)"}</div>
                   <div style={{ color: "#475569", marginTop: 4 }}># Marginal: q(x_t | x_0) — jump directly to step t</div>
                   <div style={{ color: AMB }}>q(x_t|x_0) = N(x_t; √ᾱ_t·x_0, (1-ᾱ_t)·I)</div>
@@ -1095,13 +1095,13 @@ const DiffusionModelsPage = ({ onBack }) => (
                   Rather than learning μ_θ directly, DDPM parameterises it in terms of predicted noise ε_θ:
                 </p>
                 <div style={{ background: "#1a0e00", border: `1px solid ${ORG}33`, borderRadius: 12, padding: "14px", marginBottom: 14, fontFamily: "monospace", fontSize: px(11), lineHeight: 2.2 }}>
-                  <div style={{ color: "#475569" }}># Reverse step: go from x_t to x_{t-1}</div>
+                  <div style={{ color: "#475569" }}>{"# Reverse step: go from x_t to x_{t-1}"}</div>
                   <div style={{ color: ORG }}>μ_θ(x_t,t) = (1/√α_t) · (x_t - β_t/√(1-ᾱ_t) · ε_θ(x_t,t))</div>
                   <div style={{ color: "#475569", marginTop: 4 }}># Sampling one step:</div>
                   <div style={{ color: AMB }}>eps_pred = unet(x_t, t, text_embed)  # predict noise</div>
                   <div style={{ color: AMB }}>mean = (x_t - beta_t/sqrt(1-alpha_bar_t)*eps_pred) / sqrt(alpha_t)</div>
                   <div style={{ color: AMB }}>x_prev = mean + sigma_t * torch.randn_like(x_t)</div>
-                  <div style={{ color: "#475569", marginTop: 4 }}># Repeat T times: x_T→x_{T-1}→...→x_0</div>
+                  <div style={{ color: "#475569", marginTop: 4 }}>{"# Repeat T times: x_T→x_(T-1)→...→x_0"}</div>
                 </div>
                 <p style={{ ...LBODY, color: "#94a3b8", fontSize: px(13) }}>
                   The only learned component is ε_θ (the U-Net). Everything else is fixed by the
@@ -1119,7 +1119,7 @@ const DiffusionModelsPage = ({ onBack }) => (
                   </p>
                   <div style={{ fontFamily: "monospace", fontSize: px(11), lineHeight: 2, color: "#94a3b8" }}>
                     <div style={{ color: ORG }}># DDIM reverse step (no random noise added)</div>
-                    <div>x_prev = sqrt(ᾱ_{"{t-1}"}) * pred_x0 + sqrt(1-ᾱ_{"{t-1}"}) * eps_theta</div>
+                    <div>{"x_prev = sqrt(a_bar_{t-1}) * pred_x0 + sqrt(1-a_bar_{t-1}) * eps_theta"}</div>
                     <div style={{ color: "#475569", marginTop: 4 }}># Advantages:</div>
                     <div>✅  50 steps ≈ 1000-step DDPM quality</div>
                     <div>✅  Deterministic: same latent → same image</div>
