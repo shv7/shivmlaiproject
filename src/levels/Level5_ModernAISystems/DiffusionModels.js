@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { IBox, LBODY, LCARD, LH2, LSEC, NavPage, px, STag, V } from "../../shared/lessonStyles";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { px, LCARD, LH2, LBODY, LSEC, V, STag, IBox, NavPage } from "../../shared/lessonStyles";
 
 /* ══════════════════════════════════════════════════════════════════
    LESSON — DIFFUSION MODELS
@@ -9,13 +9,11 @@ import { IBox, LBODY, LCARD, LH2, LSEC, NavPage, px, STag, V } from "../../share
 const ORG  = "#f97316";
 const AMB  = "#d97706";
 const ROSE = "#e11d48";
-const PNK  = "#ec4899";
 const VIO  = "#7c3aed";
 const IND  = "#4f46e5";
 const GRN  = "#059669";
 const CYN  = "#0891b2";
 const TEAL = "#0d9488";
-const EMR  = "#10b981";
 
 const Formula = ({ children, color = ORG }) => (
   <div style={{
@@ -91,7 +89,6 @@ const HeroCanvas = () => {
         const offX = W * 0.08 + si * (PW * SCALE + 20);
         const offY = H / 2 - (PH * SCALE) / 2;
         // draw noise frame
-        const fc = Math.min(FRAMES - 1, Math.floor(((Math.sin(t * 0.4) + 1) / 2 * FRAMES + f) % FRAMES));
         const frameData = frames[f];
         const tmpCanvas = document.createElement("canvas");
         tmpCanvas.width = PW; tmpCanvas.height = PH;
@@ -1071,7 +1068,7 @@ const DiffusionModelsPage = ({ onBack }) => (
                   <div style={{ color: "#475569", marginTop: 4 }}># Marginal: q(x_t | x_0) — jump directly to step t</div>
                   <div style={{ color: AMB }}>q(x_t|x_0) = N(x_t; √ᾱ_t·x_0, (1-ᾱ_t)·I)</div>
                   <div style={{ color: "#475569", marginTop: 4 }}># ᾱ_t = cumulative product of (1-β)</div>
-                  <div style={{ color: VIO }}>ᾱ_t = ∏{"{"+"i=1..t}"}(1-β_i)</div>
+                  <div style={{ color: VIO }}>ᾱ_t = ∏{"∏(i=1..t)(1-β_i)"}</div>
                   <div style={{ color: "#475569", marginTop: 4 }}># Python:</div>
                   <div style={{ color: GRN }}>alphas_cumprod = torch.cumprod(1 - betas, dim=0)</div>
                   <div style={{ color: GRN }}>x_t = sqrt_alpha_bar * x0 + sqrt_one_minus_alpha_bar * eps</div>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { px, LCARD, LH2, LBODY, LSEC, V, STag, IBox, NavPage } from "../../shared/lessonStyles";
 
 /* ══════════════════════════════════════════════════════════════════
@@ -659,7 +659,6 @@ const ContextSelectionGame = () => {
     const relevantIds = new Set(q.docs.filter(d => d.relevant).map(d => d.id));
     const tp = [...selected].filter(id => relevantIds.has(id)).length;
     const fp = [...selected].filter(id => !relevantIds.has(id)).length;
-    const fn = [...relevantIds].filter(id => !selected.has(id)).length;
     if (tp === relevantIds.size && fp === 0) setScore(s => s + 1);
   };
 
