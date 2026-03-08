@@ -1,8 +1,10 @@
 {
   "build": {
     "env": {
-      "CI": "false",
-      "DISABLE_ESLINT_PLUGIN": "true"
+      "CI": "false"
     }
+  },
+  "env": {
+    "CI": "false"
   }
 }
