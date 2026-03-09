@@ -15,14 +15,3 @@ const connectDB = async () => {
 };
 
 module.exports = connectDB;
-```
-
----
-
-## ✅ Fix 2 — Check Railway Root Directory
-
-Go to Railway → Service → **Settings** tab → find **"Root Directory"**
-
-Make sure it says:
-```
-backend
