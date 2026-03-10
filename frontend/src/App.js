@@ -1,81 +1,63 @@
-import { useState, useEffect, useRef } from "react";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { useEffect, useRef, useState } from "react";
+
+/* ─── New feature components ────────────────────────────────────── */
+import AccountPage from "./components/AccountPage";
+import LessonNavigation from "./components/LessonNavigation";
+import { useAuth } from "./hooks/useAuth";
+import { useProgress } from "./hooks/useProgress";
 
 /* ─── Level 1 — AI Fundamentals ─────────────────────────────────── */
 import {
-  WhatIsAI       as WhatIsAIPage,
-  HistoryOfAI    as HistoryOfAIPage,
-  AIVsMLVsDL     as AIvsMLPage,
-  TypesOfAI      as TypesOfAIPage,
-  AIApplications as AIApplicationsPage,
+  AIApplications as AIApplicationsPage, AIVsMLVsDL as AIvsMLPage, HistoryOfAI as HistoryOfAIPage, TypesOfAI as TypesOfAIPage, WhatIsAI as WhatIsAIPage
 } from "./levels/Level1_AIFundamentals/Level1_AIFundamentals";
 
 /* ─── Level 2 — Math for AI ─────────────────────────────────────── */
 import {
-  VectorsMatrices  as VectorsMatricesPage,
-  DotProduct       as DotProductPage,
-  GradientDescent  as GradientDescentPage,
-  Probability      as ProbabilityPage,
-  Statistics       as StatisticsPage,
+  DotProduct as DotProductPage,
+  GradientDescent as GradientDescentPage,
+  Probability as ProbabilityPage,
+  Statistics as StatisticsPage, VectorsMatrices as VectorsMatricesPage
 } from "./levels/Level2_MathForAI/Level2_MathForAI";
 
 /* ─── Level 3 — Machine Learning ────────────────────────────────── */
 import {
-  SupervisedLearning as SupervisedLearningPage,
-  Regression         as RegressionPage,
-  Classification     as ClassificationPage,
-  DecisionTrees      as DecisionTreesPage,
-  RandomForests      as RandomForestsPage,
-  Clustering         as ClusteringPage,
-  EvaluationMetrics  as EvaluationMetricsPage,
-  LibrariesAndProject as LibrariesAndProjectPage,
+  Classification as ClassificationPage, Clustering as ClusteringPage, DecisionTrees as DecisionTreesPage, EvaluationMetrics as EvaluationMetricsPage,
+  LibrariesAndProject as LibrariesAndProjectPage, RandomForests as RandomForestsPage, Regression as RegressionPage, SupervisedLearning as SupervisedLearningPage
 } from "./levels/Level3_MachineLearning/Level3_MachineLearning";
 
 /* ─── Level 4 — Deep Learning ───────────────────────────────────── */
 import {
-  NeuralNetworks      as NeuralNetworksPage,
   ActivationFunctions as ActivationFunctionsPage,
-  Backpropagation     as BackpropagationPage,
-  CNNs                as CNNsPage,
-  RNNs                as RNNsPage,
-  LSTM                as LSTMPage,
-  Transformers        as TransformersPage,
+  Backpropagation as BackpropagationPage,
+  CNNs as CNNsPage, LSTM as LSTMPage, NeuralNetworks as NeuralNetworksPage, RNNs as RNNsPage, Transformers as TransformersPage
 } from "./levels/Level4_DeepLearning/Level4_DeepLearning";
 
 /* ─── Level 5 — Modern AI Systems ───────────────────────────────── */
 import {
-  LargeLanguageModels as LargeLanguageModelsPage,
-  Embeddings          as EmbeddingsPage,
-  VectorDatabases     as VectorDatabasesPage,
-  RAGSystems          as RAGSystemsPage,
-  DiffusionModels     as DiffusionModelsPage,
+  DiffusionModels as DiffusionModelsPage, Embeddings as EmbeddingsPage, LargeLanguageModels as LargeLanguageModelsPage, RAGSystems as RAGSystemsPage, VectorDatabases as VectorDatabasesPage
 } from "./levels/Level5_ModernAISystems/Level5_ModernAISystems";
 
 /* ─── Level 6 — Agentic AI ──────────────────────────────────────── */
 import {
-  AIAgents          as AIAgentsPage,
-  PlanningMemory    as PlanningMemoryPage,
-  ToolUsage         as ToolUsagePage,
-  MultiAgentSystems as MultiAgentSystemsPage,
-  ReActFramework    as ReActFrameworkPage,
+  AIAgents as AIAgentsPage, MultiAgentSystems as MultiAgentSystemsPage, PlanningMemory as PlanningMemoryPage, ReActFramework as ReActFrameworkPage, ToolUsage as ToolUsagePage
 } from "./levels/Level6_AgenticAI/Level6_AgenticAI";
 
 /* ─── Level 7 — AGI & The Future ────────────────────────────────── */
 import {
-  ArtificialGeneralIntelligence as AGIPage,
-  Superintelligence             as SuperintelligencePage,
-  AIAlignment                   as AIAlignmentPage,
-  SafetyEthics                  as SafetyEthicsPage,
-  FutureOfAI                    as FutureOfAIPage,
+  AIAlignment as AIAlignmentPage, ArtificialGeneralIntelligence as AGIPage, FutureOfAI as FutureOfAIPage, SafetyEthics as SafetyEthicsPage, Superintelligence as SuperintelligencePage
 } from "./levels/Level7_AGI_Future/Level7_AGI_Future";
 
 /* ─── Shared palette (T.amber / T.paper used in lesson nav CSS) ─── */
-import { T } from "./shared/lessonStyles";
 
 /* ═══════════════════════════════════════════════════════════════════
    SHIVMLAI — MAIN PLATFORM
    Platform palette, helpers, and all platform-level components live
    here. Lesson content lives in src/levels/...
 ═══════════════════════════════════════════════════════════════════ */
+
+/* Google OAuth Client ID */
+const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID_HERE";
 
 // ── Main platform palette ─────────────────────────────────────────
 const C = {
@@ -643,17 +625,25 @@ export default function App() {
   const [activeSection, setActiveSection] = useState("home");
   const [activePage, setActivePage] = useState(null); // e.g. "what-is-ai"
 
+  /* ── Auth + Progress ─────────────────────────────────────────── */
+  const { user, login, logout, isLoggedIn } = useAuth();
+  const {
+    completed, markComplete, isComplete,
+    getLevelProgress, getOverallProgress, completedLevels,
+  } = useProgress();
+
   const navItems = [
     { id: "home", label: "Home" }, { id: "roadmap", label: "Roadmap" }, { id: "concepts", label: "Concepts" },
     { id: "playground", label: "Playground" }, { id: "quiz", label: "Quizzes" }, { id: "projects", label: "Projects" },
     { id: "diagrams", label: "3D Diagrams" }, { id: "complete", label: "Certificate" },
+    { id: "account", label: isLoggedIn ? `👤 ${user?.name?.split(" ")[0] || "Me"}` : "Account" },
   ];
 
   const handleOpenLesson = (pageKey) => { setActivePage(pageKey); window.scrollTo(0, 0); };
   const handleBackFromLesson = () => { setActivePage(null); window.scrollTo(0, 0); };
 
-  // If a lesson page is active, render it full-screen (but keep nav)
-  const lessonNav = (color, Page) => (
+  // If a lesson page is active, render it full-screen with navigation bar
+  const lessonNav = (color, Page, pageKey) => (
     <div style={{ background: C.bg, minHeight: "100vh" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;900&family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@700;900&family=Lora:wght@400;600&display=swap');*{box-sizing:border-box;margin:0;padding:0;}::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:#faf7f2}::-webkit-scrollbar-thumb{background:${color}66;border-radius:4px}`}</style>
       <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 300, background: `${C.bg}ee`, backdropFilter: "blur(20px)", borderBottom: `1px solid ${C.border}`, height: 52, display: "flex", alignItems: "center", padding: "0 20px", gap: 12 }}>
@@ -661,102 +651,86 @@ export default function App() {
           <div style={{ width: 28, height: 28, borderRadius: "50%", background: `radial-gradient(${C.accent}, ${C.accent2})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>🧠</div>
           <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 900, fontSize: 16, color: C.text }}>ShivML<span style={{ color: C.accent }}>AI</span></span>
         </div>
-        <button onClick={handleBackFromLesson} style={{ marginLeft: "auto", background: `${C.accent}22`, border: `1px solid ${C.accent}44`, borderRadius: 8, padding: "6px 16px", color: C.accent, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>← Back to Platform</button>
+        {isLoggedIn && (
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: "auto", marginRight: 8 }}>
+            {user?.picture && <img src={user.picture} alt="" style={{ width: 26, height: 26, borderRadius: "50%" }} />}
+            <span style={{ color: C.muted, fontSize: 12 }}>{user?.name?.split(" ")[0]}</span>
+          </div>
+        )}
+        <button onClick={handleBackFromLesson} style={{ marginLeft: isLoggedIn ? 0 : "auto", background: `${C.accent}22`, border: `1px solid ${C.accent}44`, borderRadius: 8, padding: "6px 16px", color: C.accent, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>← Back to Platform</button>
       </nav>
-      <div style={{ paddingTop: 52 }}><Page onBack={handleBackFromLesson} /></div>
+      <div style={{ paddingTop: 52 }}>
+        <Page onBack={handleBackFromLesson} />
+        <LessonNavigation
+          currentKey={pageKey}
+          isLoggedIn={isLoggedIn}
+          isComplete={pageKey ? isComplete(pageKey) : false}
+          onMarkComplete={markComplete}
+          onNavigate={handleOpenLesson}
+          onBack={handleBackFromLesson}
+        />
+      </div>
     </div>
   );
 
   // ── Level 1 routes ──────────────────────────────────────────────
-  if (activePage === "ai-vs-ml-dl")       return lessonNav("#7c3aed", AIvsMLPage);
-  if (activePage === "types-of-ai")       return lessonNav("#0284c7", TypesOfAIPage);
-  if (activePage === "ai-applications")   return lessonNav("#10b981", AIApplicationsPage);
+  if (activePage === "ai-vs-ml-dl")       return lessonNav("#7c3aed", AIvsMLPage, "ai-vs-ml-dl");
+  if (activePage === "types-of-ai")       return lessonNav("#0284c7", TypesOfAIPage, "types-of-ai");
+  if (activePage === "ai-applications")       return lessonNav("#10b981", AIApplicationsPage, "ai-applications");
 
   // ── Level 2 routes — Math for AI ────────────────────────────────
-  if (activePage === "vectors-matrices")  return lessonNav("#4f46e5", VectorsMatricesPage);
-  if (activePage === "dot-product")       return lessonNav("#7c3aed", DotProductPage);
-  if (activePage === "gradient-descent")  return lessonNav("#0891b2", GradientDescentPage);
-  if (activePage === "probability")       return lessonNav("#059669", ProbabilityPage);
-  if (activePage === "statistics")        return lessonNav("#d97706", StatisticsPage);
+  if (activePage === "vectors-matrices")       return lessonNav("#4f46e5", VectorsMatricesPage, "vectors-matrices");
+  if (activePage === "dot-product")       return lessonNav("#7c3aed", DotProductPage, "dot-product");
+  if (activePage === "gradient-descent")       return lessonNav("#0891b2", GradientDescentPage, "gradient-descent");
+  if (activePage === "probability")       return lessonNav("#059669", ProbabilityPage, "probability");
+  if (activePage === "statistics")       return lessonNav("#d97706", StatisticsPage, "statistics");
 
   // ── Level 3 routes — Machine Learning ───────────────────────────
-  if (activePage === "supervised-learning")  return lessonNav("#f59e0b", SupervisedLearningPage);
-  if (activePage === "regression")           return lessonNav("#ef4444", RegressionPage);
-  if (activePage === "classification")       return lessonNav("#8b5cf6", ClassificationPage);
-  if (activePage === "decision-trees")       return lessonNav("#059669", DecisionTreesPage);
-  if (activePage === "random-forests")       return lessonNav("#0891b2", RandomForestsPage);
-  if (activePage === "clustering")           return lessonNav("#ec4899", ClusteringPage);
-  if (activePage === "evaluation-metrics")   return lessonNav("#f97316", EvaluationMetricsPage);
-  if (activePage === "libraries-and-project") return lessonNav("#4f46e5", LibrariesAndProjectPage);
+  if (activePage === "supervised-learning")       return lessonNav("#f59e0b", SupervisedLearningPage, "supervised-learning");
+  if (activePage === "regression")       return lessonNav("#ef4444", RegressionPage, "regression");
+  if (activePage === "classification")       return lessonNav("#8b5cf6", ClassificationPage, "classification");
+  if (activePage === "decision-trees")       return lessonNav("#059669", DecisionTreesPage, "decision-trees");
+  if (activePage === "random-forests")       return lessonNav("#0891b2", RandomForestsPage, "random-forests");
+  if (activePage === "clustering")       return lessonNav("#ec4899", ClusteringPage, "clustering");
+  if (activePage === "evaluation-metrics")       return lessonNav("#f97316", EvaluationMetricsPage, "evaluation-metrics");
+  if (activePage === "libraries-and-project")       return lessonNav("#4f46e5", LibrariesAndProjectPage, "libraries-and-project");
 
   // ── Level 4 routes — Deep Learning ──────────────────────────────
-  if (activePage === "neural-networks")      return lessonNav("#7c3aed", NeuralNetworksPage);
-  if (activePage === "activation-functions") return lessonNav("#0891b2", ActivationFunctionsPage);
-  if (activePage === "backpropagation")      return lessonNav("#e11d48", BackpropagationPage);
-  if (activePage === "cnns")                 return lessonNav("#f59e0b", CNNsPage);
-  if (activePage === "rnns")                 return lessonNav("#059669", RNNsPage);
-  if (activePage === "lstm")                 return lessonNav("#4f46e5", LSTMPage);
-  if (activePage === "transformers")         return lessonNav("#ec4899", TransformersPage);
+  if (activePage === "neural-networks")       return lessonNav("#7c3aed", NeuralNetworksPage, "neural-networks");
+  if (activePage === "activation-functions")       return lessonNav("#0891b2", ActivationFunctionsPage, "activation-functions");
+  if (activePage === "backpropagation")       return lessonNav("#e11d48", BackpropagationPage, "backpropagation");
+  if (activePage === "cnns")       return lessonNav("#f59e0b", CNNsPage, "cnns");
+  if (activePage === "rnns")       return lessonNav("#059669", RNNsPage, "rnns");
+  if (activePage === "lstm")       return lessonNav("#4f46e5", LSTMPage, "lstm");
+  if (activePage === "transformers")       return lessonNav("#ec4899", TransformersPage, "transformers");
 
   // ── Level 5 routes — Modern AI Systems ──────────────────────────
-  if (activePage === "large-language-models") return lessonNav("#ec4899", LargeLanguageModelsPage);
-  if (activePage === "embeddings")            return lessonNav("#8b5cf6", EmbeddingsPage);
-  if (activePage === "vector-databases")      return lessonNav("#0891b2", VectorDatabasesPage);
-  if (activePage === "rag-systems")           return lessonNav("#059669", RAGSystemsPage);
-  if (activePage === "diffusion-models")      return lessonNav("#f97316", DiffusionModelsPage);
+  if (activePage === "large-language-models")       return lessonNav("#ec4899", LargeLanguageModelsPage, "large-language-models");
+  if (activePage === "embeddings")       return lessonNav("#8b5cf6", EmbeddingsPage, "embeddings");
+  if (activePage === "vector-databases")       return lessonNav("#0891b2", VectorDatabasesPage, "vector-databases");
+  if (activePage === "rag-systems")       return lessonNav("#059669", RAGSystemsPage, "rag-systems");
+  if (activePage === "diffusion-models")       return lessonNav("#f97316", DiffusionModelsPage, "diffusion-models");
 
   // ── Level 6 routes — Agentic AI ─────────────────────────────────
-  if (activePage === "ai-agents")            return lessonNav("#f97316", AIAgentsPage);
-  if (activePage === "planning-memory")      return lessonNav("#7c3aed", PlanningMemoryPage);
-  if (activePage === "tool-usage")           return lessonNav("#0891b2", ToolUsagePage);
-  if (activePage === "multi-agent-systems")  return lessonNav("#e11d48", MultiAgentSystemsPage);
-  if (activePage === "react-framework")      return lessonNav("#059669", ReActFrameworkPage);
+  if (activePage === "ai-agents")       return lessonNav("#f97316", AIAgentsPage, "ai-agents");
+  if (activePage === "planning-memory")       return lessonNav("#7c3aed", PlanningMemoryPage, "planning-memory");
+  if (activePage === "tool-usage")       return lessonNav("#0891b2", ToolUsagePage, "tool-usage");
+  if (activePage === "multi-agent-systems")       return lessonNav("#e11d48", MultiAgentSystemsPage, "multi-agent-systems");
+  if (activePage === "react-framework")       return lessonNav("#059669", ReActFrameworkPage, "react-framework");
 
   // ── Level 7 routes — AGI & The Future ───────────────────────────
-  if (activePage === "artificial-general-intelligence") return lessonNav("#ef4444", AGIPage);
-  if (activePage === "superintelligence")    return lessonNav("#7c3aed", SuperintelligencePage);
-  if (activePage === "ai-alignment")         return lessonNav("#f59e0b", AIAlignmentPage);
-  if (activePage === "safety-ethics")        return lessonNav("#0891b2", SafetyEthicsPage);
-  if (activePage === "future-of-ai")         return lessonNav("#059669", FutureOfAIPage);
+  if (activePage === "artificial-general-intelligence")       return lessonNav("#ef4444", AGIPage, "artificial-general-intelligence");
+  if (activePage === "superintelligence")       return lessonNav("#7c3aed", SuperintelligencePage, "superintelligence");
+  if (activePage === "ai-alignment")       return lessonNav("#f59e0b", AIAlignmentPage, "ai-alignment");
+  if (activePage === "safety-ethics")       return lessonNav("#0891b2", SafetyEthicsPage, "safety-ethics");
+  if (activePage === "future-of-ai")       return lessonNav("#059669", FutureOfAIPage, "future-of-ai");
 
-  if (activePage === "history-of-ai") {
-    return (
-      <div style={{ background: C.bg, minHeight: "100vh" }}>
-        <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;900&family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@700;900&family=Lora:wght@400;600&display=swap');*{box-sizing:border-box;margin:0;padding:0;}@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}@keyframes glow{0%,100%{opacity:0.6}50%{opacity:1}}input[type=range]{cursor:pointer;}::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:#faf7f2}::-webkit-scrollbar-thumb{background:#f59e0b66;border-radius:4px}`}</style>
-        <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 300, background: `${C.bg}ee`, backdropFilter: "blur(20px)", borderBottom: `1px solid ${C.border}`, height: 52, display: "flex", alignItems: "center", padding: "0 20px", gap: 12 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ width: 28, height: 28, borderRadius: "50%", background: `radial-gradient(${C.accent}, ${C.accent2})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>🧠</div>
-            <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 900, fontSize: 16, color: C.text }}>ShivML<span style={{ color: C.accent }}>AI</span></span>
-          </div>
-          <button onClick={handleBackFromLesson} style={{ marginLeft: "auto", background: `${C.accent}22`, border: `1px solid ${C.accent}44`, borderRadius: 8, padding: "6px 16px", color: C.accent, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>← Back to Platform</button>
-        </nav>
-        <div style={{ paddingTop: 52 }}>
-          <HistoryOfAIPage onBack={handleBackFromLesson} />
-        </div>
-      </div>
-    );
-  }
+  if (activePage === "history-of-ai")     return lessonNav("#f59e0b", HistoryOfAIPage, "history-of-ai");
 
-  if (activePage === "what-is-ai") {
-    return (
-      <div style={{ background: C.bg, minHeight: "100vh" }}>
-        <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;900&family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@700;900&family=Lora:wght@400;600&display=swap');*{box-sizing:border-box;margin:0;padding:0;}@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}@keyframes glow{0%,100%{opacity:0.6}50%{opacity:1}}input[type=range]{accent-color:${T.amber};cursor:pointer;}::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:${T.paper}}::-webkit-scrollbar-thumb{background:${T.amber}66;border-radius:4px}`}</style>
-        {/* mini top nav */}
-        <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 300, background: `${C.bg}ee`, backdropFilter: "blur(20px)", borderBottom: `1px solid ${C.border}`, height: 52, display: "flex", alignItems: "center", padding: "0 20px", gap: 12 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ width: 28, height: 28, borderRadius: "50%", background: `radial-gradient(${C.accent}, ${C.accent2})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>🧠</div>
-            <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 900, fontSize: 16, color: C.text }}>ShivML<span style={{ color: C.accent }}>AI</span></span>
-          </div>
-          <button onClick={handleBackFromLesson} style={{ marginLeft: "auto", background: `${C.accent}22`, border: `1px solid ${C.accent}44`, borderRadius: 8, padding: "6px 16px", color: C.accent, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>← Back to Platform</button>
-        </nav>
-        <div style={{ paddingTop: 52 }}>
-          <WhatIsAIPage onBack={handleBackFromLesson} />
-        </div>
-      </div>
-    );
-  }
+  if (activePage === "what-is-ai")       return lessonNav("#f59e0b", WhatIsAIPage, "what-is-ai");
 
   return (
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
     <div style={{ background: C.bg, minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", color: C.text }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;900&family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@700;900&family=Lora:wght@400;600&display=swap');
@@ -937,6 +911,21 @@ export default function App() {
           </div>
         )}
 
+        {/* ACCOUNT */}
+        {activeSection === "account" && (
+          <AccountPage
+            user={user}
+            isLoggedIn={isLoggedIn}
+            onLogin={login}
+            onLogout={logout}
+            completed={completed}
+            getLevelProgress={getLevelProgress}
+            getOverallProgress={getOverallProgress}
+            completedLevels={completedLevels}
+            onOpenLesson={handleOpenLesson}
+          />
+        )}
+
         {/* CERTIFICATE */}
         {activeSection === "complete" && (
           <div style={{ maxWidth: 800, margin: "0 auto", padding: "60px 24px", textAlign: "center" }}>
@@ -966,6 +955,6 @@ export default function App() {
         )}
       </div>
     </div>
+    </GoogleOAuthProvider>
   );
 }
-
