@@ -1,12 +1,47 @@
-# Backend
-backend/node_modules
-backend/.env
+# ════════════════════════════════════════
+# ShivMLAI — Root .gitignore
+# NEVER push .env files — they have secrets
+# ════════════════════════════════════════
 
-# Frontend
-frontend/node_modules
-frontend/.env
-frontend/build
+# ── ENV FILES (MOST IMPORTANT) ──────────
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+**/.env
+**/.env.*
+!**/.env.example
 
-# General
+# ── Node.js ──────────────────────────────
+node_modules/
+**/node_modules/
+npm-debug.log*
+yarn-error.log
+
+# ── React Build ───────────────────────────
+frontend/build/
+frontend/.pnp
+frontend/.pnp.js
+
+# ── Python / FastAPI ──────────────────────
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyc
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+.pytest_cache/
+
+# ── OS Files ──────────────────────────────
 .DS_Store
+Thumbs.db
 *.log
+
+# ── IDE ───────────────────────────────────
+.vscode/settings.json
+.idea/
+*.swp

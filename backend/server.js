@@ -2,7 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 
+console.log("Running from:", __dirname);
 dotenv.config();
+console.log("ENV CHECK:",process.env.MONGODB_URI);
 
 const connectDB = require('./config/db');
 connectDB();

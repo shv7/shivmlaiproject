@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 /* ─── New feature components ────────────────────────────────────── */
 import AccountPage from "./components/AccountPage";
 import LessonNavigation from "./components/LessonNavigation";
+import ShivAgent from "./components/ShivAgent";
 import { useAuth } from "./hooks/useAuth";
 import { useProgress } from "./hooks/useProgress";
 
@@ -642,6 +643,12 @@ export default function App() {
   const handleOpenLesson = (pageKey) => { setActivePage(pageKey); window.scrollTo(0, 0); };
   const handleBackFromLesson = () => { setActivePage(null); window.scrollTo(0, 0); };
 
+  // ── Shiv Agent navigation handler ────────────────────────────
+  const handleShivNavigate = (lessonKey) => {
+    setActivePage(lessonKey);
+    window.scrollTo(0, 0);
+  };
+
   // If a lesson page is active, render it full-screen with navigation bar
   const lessonNav = (color, Page, pageKey) => (
     <div style={{ background: C.bg, minHeight: "100vh" }}>
@@ -670,6 +677,11 @@ export default function App() {
           onBack={handleBackFromLesson}
         />
       </div>
+      {/* Ask Shiv — visible on every lesson page */}
+      <ShivAgent
+        onNavigate={handleShivNavigate}
+        userId={user?.id || "guest"}
+      />
     </div>
   );
 
@@ -955,6 +967,13 @@ export default function App() {
         )}
       </div>
     </div>
+
+    {/* ── Shiv AI Agent — floating on every screen ── */}
+    <ShivAgent
+      onNavigate={handleShivNavigate}
+      userId={user?.id || "guest"}
+    />
+
     </GoogleOAuthProvider>
   );
 }

@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+
+# Env — NEVER push
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
